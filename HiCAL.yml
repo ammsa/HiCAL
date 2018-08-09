@@ -23,9 +23,12 @@ services:
       - postgres
     volumes:
       - ./HiCALWeb:/app
+      - ./data:/data
     environment:
       - POSTGRES_USER=hicalweb
       - USE_DOCKER=yes
+      - ANSERINI_INDEX=/data/search/index/lucene-index.wash18.pos+docvectors+rawdocs
+      - ANSERINI_JAR=/data/search/Anserini/target/anserini-0.1.1-SNAPSHOT-fatjar.jar
     expose:
       - "8001"
     command: /start.sh

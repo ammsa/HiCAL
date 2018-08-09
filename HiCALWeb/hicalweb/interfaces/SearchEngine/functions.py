@@ -1,54 +1,68 @@
+from hicalweb.interfaces.DocumentSnippetEngine import functions as DocEngine
 from collections import OrderedDict
-from config.settings.base import SEARCH_SERVER_IP
-from config.settings.base import SEARCH_SERVER_PORT
-import urllib.parse
+import environ
+import re
+import string
+import jnius_config
 
-import httplib2
-import xmltodict
+env = environ.Env()
+ANSERINI_JAR = env.str('ANSERINI_JAR')
+ANSERINI_INDEX = env.str('ANSERINI_INDEX')
+
+
+jnius_config.set_classpath(ANSERINI_JAR)
+
+print(ANSERINI_JAR, ANSERINI_INDEX)
+
+
+from jnius import autoclass
+
+try:
+    JString = autoclass('java.lang.String')
+    JSearcher = autoclass('io.anserini.search.SimpleSearcher')
+
+    searcher = JSearcher(JString(ANSERINI_INDEX))
+except Exception as e:
+    print("Ops! error occured while configuring search. {}".format(e))
+
+import re
+def striphtml(data):
+    p = re.compile(r'<.*?>')
+    return p.sub('', data)
+
+def highlight_terms(query, content):
+    terms = query.lower().split(" ")
+    
+    for word in content.split(" "):
+        word = re.sub('[%s]' % re.escape(string.punctuation), '', word)
+        if len(word) <= 2: continue
+        if word.lower() in terms:
+            content = content.replace(word, "<b>{}</b>".format(word)) 
+    return content
 
 
 def get_documents(query, start=0, numdisplay=20):
-    """
-
-    :param query:
-    :param start:
-    :param numdisplay:
-    :return:
-    """
-    h = httplib2.Http()
-    url = "http://{}:{}/treccore/websearchapi/search.php?{}"
-
-    parameters = {'start': start, 'numdisplay': numdisplay, 'query': query}
-    parameters = urllib.parse.urlencode(parameters)
-    resp, content = h.request(url.format(SEARCH_SERVER_IP,
-                                         SEARCH_SERVER_PORT,
-                                         parameters),
-                              method="GET")
-
-    if resp and resp.get("status") == "200":
-        xmlDict = xmltodict.parse(content)
+    doc_ids = []
+    result = OrderedDict()
+    
+    hits = searcher.search(JString(query))
+    for docnum, doc in enumerate(hits):
+        title = DocEngine.get_document_title(doc.docid)
+        title = highlight_terms(query, str(title))
+       
         try:
-            xmlResult = xmlDict['search-response']['results']['result']
-        except TypeError:
-            return None, None, None
+            snippet = striphtml(doc.content)[:250]
+            snippet = highlight_terms(query, str(snippet))
+        except Exception:
+            snippet = 'Unknown error from Anserini'
+        parsed_doc = {
+           "rank": docnum,
+           "docno": hits[docnum].docid,
+           "title": title,
+           "snippet": snippet
+        }
 
-        doc_ids = []
-        result = OrderedDict()
-
-        if not isinstance(xmlResult, list):
-            xmlResult = [xmlResult]
-
-        for doc in xmlResult:
-            docno = doc["docno"].zfill(7)
-            parsed_doc = {
-                "rank": doc["rank"],
-                "docno": docno,
-                "title": doc["title"],
-                "snippet": doc["snippet"]
-            }
-            result[docno] = parsed_doc
-            doc_ids.append(docno)
-
-        return result, doc_ids,  xmlDict['search-response']['total-time']
-
-    return None, None, None
+        result[hits[docnum].docid] = parsed_doc
+        doc_ids.append(hits[docnum].docid)
+    
+    return result, doc_ids, ""     

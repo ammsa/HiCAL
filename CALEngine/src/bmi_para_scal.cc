@@ -18,6 +18,9 @@ BMI_para_scal::BMI_para_scal(Seed _seed,
         add_to_training_cache(documents->get_index(seed_judgment.first), seed_judgment.second);
     }
     perform_iteration();
+    stratums.push_back(vector<int>());
+    for(int doc_id: judgment_queue)
+        stratums.back().push_back(doc_id);
     B = B + ceil(B/10.0);
 }
 
@@ -57,7 +60,7 @@ void BMI_para_scal::record_judgment_batch(vector<pair<string, int>> _judgments){
         shuffle(batch.begin(), batch.end(), rand_generator);
         for(int i = 0; i < batch.size(); i++){
             if(selector[i]) judgment_queue.push_back(batch[i]);
-            else judgments[batch[i]] = -2;
+            judgments[paragraphs->translate_index(batch[i])] = -2;
         }
         B = B + ceil(B/10.0);
     }

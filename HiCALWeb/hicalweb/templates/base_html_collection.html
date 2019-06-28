@@ -1,0 +1,726 @@
+{% load staticfiles i18n static raven %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="HiCAL">
+    <meta name="author" content="University of Waterloo IR lab.">
+
+    <title>HiCAL - {% block pagetitle %}home{% endblock %}</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{% static 'css/project.css' %}" rel="stylesheet">
+    <link href="{% static 'css/CAL_html.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.10/css/all.css" integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg" crossorigin="anonymous">
+    {% include "raven-config.html" %}
+
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="html-collection">
+
+<div id="Main" class="container">
+    <div id="header" class="bg-faded">
+        <div id="LogoWrapper">
+          <a rel="home" href="/" title="HiCAL">
+                <img id="Logo" src="{% static 'images/hical.png' %}"  alt="HiCAL logo">
+            </a>
+        </div>
+        <div id="Meta">
+          <div><span id="meta_docid" class="bold"></span></div>
+          <div><a href="#">View as plain text</a> - <a href="#">View as plain text</a></div>
+{#          <textarea rows="1" cols="5" placeholder="Type HTML or text here..."></textarea>#}
+{#                        <button class="btn btn-sm" onclick="updateIframe()">Insert Content</button>#}
+        </div>
+
+      <div id="Help" class="h-100 d-flex">
+        <a class="nav-link small btn btn-sm btn-outline-secondary p-4 align-self-center" href="#" data-toggle="modal" data-target="#helpModal">Help</a>
+      </div>
+      <div class="Judging">
+
+        <span class="gray-text">Keyboard shortcuts:</span>
+        <div class="row">
+          <div class="col-md-2">
+            <span class="badge badge-danger">s</span>
+          </div>
+          <div class="col-md-10">
+            <small class="left-margin">Mark as non-relevant
+            </small>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-2">
+            <span class="badge badge-warning">r</span>
+          </div>
+          <div class="col-md-10">
+            <small class="left-margin">Mark as relevant
+            </small>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-2">
+            <span class="badge badge-success">h</span>
+          </div>
+          <div class="col-md-10">
+            <small class="left-margin">Mark as highly relevant
+            </small>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-2">
+            <span class="badge badge-primary">u</span>
+          </div>
+          <div class="col-md-10">
+            <small class="left-margin">Show latest judgments
+            </small>
+          </div>
+        </div>
+      </div>
+      <div class="Judging">
+        <div class="gray-text align-left">Judge document:</div>
+
+        <div class="btn-group mt-2 mb-2" role="group">
+          <a href="#"
+             onclick="return send_judgment($('#cal-document').data('doc-id'), $('#document_title').text(), $('#document_snippet').html(), false, true, false, true, false);"
+             class="btn btn-sm btn-danger">Not relevant</a>
+          <a href="#"
+             onclick="return send_judgment($('#cal-document').data('doc-id'), $('#document_title').text(), $('#document_snippet').html(), false, false, true, true, false);"
+             class="btn btn-sm btn-warning">Relevant</a>
+          <a href="#"
+             onclick="return send_judgment($('#cal-document').data('doc-id'), $('#document_title').text(), $('#document_snippet').html(), true, false, false, true, false);"
+             class="btn btn-sm btn-success">Highly relevant</a>
+        </div>
+
+        <div class="gray-text align-left">Highlight content:</div>
+        <form id="searchContentForm" class="mt-1">
+          <div class="input-group">
+            <input id="search_content" type="search"
+                   class="form-control" placeholder="Search">
+            <span class="input-group-btn">
+                                    <button class="btn btn-sm btn-secondary"
+                                            data-search="next" id="searchNext"
+                                            type="button">&darr;</button>
+                                  </span>
+            <span class="input-group-btn">
+                                    <button class="btn btn-sm btn-secondary"
+                                            data-search="prev"
+                                            type="button">&uarr;</button>
+                                  </span>
+            <span class="input-group-btn">
+                                    <button class="btn btn-sm btn-secondary"
+                                            data-search="clear" type="button">✖
+                                    </button>
+                                  </span>
+          </div>
+        </form>
+      </div>
+    </div>
+  <script>
+  </script>
+    <div id="DocView">
+      <iframe id="document_iframe"></iframe>
+    </div>
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="{% static 'js/jquery.mark.min.js' %}"></script>
+<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
+        integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+        crossorigin="anonymous"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+    <script src="{% static 'js/Queue.src.js' %}"></script>
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>#}
+{#    <script src="{% static 'js/jquery.mark.min.js' %}"></script>#}
+    <script src="{% static 'js/mousetrap.min.js' %}"></script>
+    <script src="{% static 'js/CAL.js' %}"></script>
+    <script src="{% static 'js/moment.min.js' %}"></script>
+    <script src="{% static 'js/idle.js' %}"></script>
+    <script src="{% static 'js/timer.js' %}"></script>
+
+<script>
+
+  function updateIframe() {
+      var myFrame = $("#document_iframe").contents().find('html');
+      var textareaValue = $("textarea").val();
+      myFrame.html(textareaValue);
+    }
+
+
+  var queue = new Queue();
+  var latestJudgedDocsQueue = new Queue();
+
+  var judged_docs = {}; // dict of judged docs at the session level. Resets after refresh
+
+
+  var documentTimer = null;
+  // Get initial document at page visit
+  $.ajax({
+      url: '{% url 'CAL:get_docs' %}',
+      type: 'GET',
+      success: function (result) {
+          // console.log(JSON.stringify(result));
+          if (result.length) {
+              console.log(result.length);
+              for (var i = 0; i < result.length; i++) {
+                  queue.enqueue(result[i]);
+                  console.log(result[i]);
+              }
+              if(!queue.isEmpty()){
+                  var next_doc = queue.dequeue();
+                  updateDocument(
+                          next_doc["doc_id"],
+                          next_doc["title"],
+                          next_doc["content"]
+                  );
+              }
+          }else{
+              updateDocument(
+                      "",
+                      "<span class='text-danger'>Server returned empty list.</span>",
+                      "Something went wrong.. "
+                  );
+          }
+      },
+      error: function (result){
+          console.error("Error occurred: " + JSON.stringify(result));
+      },
+      statusCode: {
+          502: function (xhr) {
+              if(document_isEmpty()){
+                  updateDocument("",
+                  "<span class='text-danger'>Failed to retrieve docs..</sapn>",
+                  "<code>" + xhr.responseText + "</code>"
+                  );
+              }
+              console.error("Failed to get documents. Error message: "+xhr.responseText);
+          }
+      }
+  });
+
+
+  // Get populate prev judged document queue
+  $.ajax({
+      url: '{% url 'judgment:get_latest' number_of_docs_to_show=10 %}',
+      type: 'GET',
+      success: function (result) {
+          for(var i = result.length - 1; i >= 0; i--){
+              latestJudgedDocsQueue.enqueue(
+                  result[i]
+              );
+          }
+          update_latest_judged_doc_view();
+      }
+  });
+
+  function update_iframe(content){
+    var document_iframe = $("#document_iframe").contents().find('html');
+    document_iframe.html(content);
+  }
+
+  function updateDocument(id, title, content){
+      console.log("Updating document view for document id: " + id);
+      $("#meta_docid").html(id);
+      update_iframe(content);
+      window.scrollTo(0, 0);
+      if(id){
+
+          console.log("Initializing timer for document " + id);
+          if(documentTimer != null){
+              documentTimer.idle.stop();
+          }
+          documentTimer = AwayTimer();
+
+          var now = + new Date();
+          var data = {
+              'action': 'trig_update_document_view',
+              'message': 'The view of current document has been updated to a new document.',
+              'doc_id': id,
+              'doc_title': title,
+              'extra_context': {},
+              'client_time': now,
+              'csrfmiddlewaretoken': '{{ csrf_token }}',
+              'page_title': document.title
+          };
+
+          $.ajax({
+              url: '{% url 'CAL:post_log_msg' %}',
+              type: 'POST',
+              data: JSON.stringify(data),
+              success: function (result) {
+                  console.log(result['message']);
+              }
+          });
+
+      }else{
+          // when an error has occurred and no document is shown (e.g. no doc id) hide button.
+
+      }
+  }
+
+
+  function update_documents_to_judge_list() {
+      $.ajax({
+          url: '{% url 'CAL:get_docs' %}',
+          type: 'GET',
+          data: JSON.stringify({csrfmiddlewaretoken: '{{ csrf_token }}'}),
+          success: function (result) {
+              if (result.length) {
+                  for (var i = 0; i < result.length; i++) {
+                      queue.enqueue(result[i]);
+                  }
+              }
+          }
+      });
+  }
+
+  function send_judgment(current_doc_id, rel) {
+      var current_doc_title = $("#document_title").html();
+      var current_doc_id = $("#meta_docid").html();
+
+      window.scrollTo(0, 0);
+      if(current_doc_id == "") {
+          console.log("Please wait...");
+          return false;
+      }
+
+      var now = + new Date();
+
+      var highlyRelevant = false;
+      var nonrelevant = false;
+      var relevant = false;
+
+      if (rel == 2){
+        highlyRelevant = true;
+      } else if (rel == 1) {
+        relevant = true;
+      } else {
+        nonrelevant = true;
+      }
+
+      console.log("Saving '"+current_doc_id+"' to judged_docs JS dict");
+      judged_docs[current_doc_id] = true;
+
+      // var tA = Date.now() - documentTimer.startTime - documentTimer.totalAwayTime;
+
+      console.log("Sending judgment call to backend for document id: " + current_doc_id);
+      var timeVerbose = {
+          "timestamp": now,
+          "timeActive": -1,
+          "timeAway": -1,
+          "source": "CAL",
+          "judged": true,
+          "isMouse": null,
+          "isKeyboard": null,
+          "highlyRelevant": highlyRelevant,
+          "nonrelevant": nonrelevant,
+          "relevant": relevant
+      };
+
+      var data = {
+          'doc_id': current_doc_id,
+          'highlyRelevant': highlyRelevant,
+          'nonrelevant': nonrelevant,
+          'relevant': relevant,
+          'isFromCAL': true,
+          'isFromSearch': false,
+          'isFromSearchModal': false,
+          'isFromIterative': false,
+          'client_time': now,
+          'fromMouse': null,
+          'fromKeyboard': null,
+          'timeVerbose': timeVerbose,
+          'search_query': null,
+          'ctrl_f_terms_input': $("#search_content").val(),
+          'found_ctrl_f_terms_in_title': marked_matches_in_document_title,
+          'found_ctrl_f_terms_in_summary': marked_matches_in_document_snippet,
+          'found_ctrl_f_terms_in_full_doc': marked_matches_in_document_content,
+          'csrfmiddlewaretoken': '{{ csrf_token }}',
+          'page_title': document.title
+      };
+
+
+      $.ajax({
+          url: '{% url 'judgment:post_judgment' %}',
+          type: 'POST',
+          data: JSON.stringify(data),
+          success: function (result) {
+
+              console.log(result['message'], " - Updating the queue after sending judgment of document: " + data["doc_id"]);
+              queue = new Queue();
+              for(var i = 0; i < result['next_docs'].length; i++){
+                  queue.enqueue(result['next_docs'][i]);
+              }
+
+              var isempty_view = document_isEmpty();
+              if(isempty_view){
+                  console.log("Empty view. Updating the view with a document.");
+                  if(queue.isEmpty()){
+                      updateDocument(
+                              "",
+                              "No documents received for judging",
+                              ""
+                      );
+                  }else{
+                      var next_doc = false;
+                      while(next_doc === false){
+                          var next_doc_tmp = queue.dequeue();
+                          if(next_doc_tmp == undefined)
+                              break;
+                          if(!(next_doc_tmp["doc_id"] in judged_docs)){
+                              next_doc = next_doc_tmp;
+                          }
+                      }
+                      if(next_doc !== false){
+                          updateDocument(
+                                  next_doc["doc_id"],
+                                  next_doc["title"],
+                                  next_doc["content"]
+                          );
+                      }
+
+                  }
+              }
+              if(result['is_max_judged_reached']){
+                  window.location.href = "{% url 'progress:home' %}";
+              }
+          },
+          error: function (result){
+              if(document_isEmpty()){
+                  updateDocument("",
+                  "<span class='text-danger'>Something went wrong..</span>",
+                  result['message'])
+              }
+
+              console.error("Something went wrong. " +
+                      "Judgment may have not been recorded.", result['responseText'])
+          },
+          statusCode: {
+              502: function (xhr) {
+                  if(document_isEmpty()){
+                      updateDocument("",
+                      "<span class='text-danger'>Something went wrong..</sapn>",
+                      xhr.responseText);
+                  }
+                  console.log("Something went wrong. Timeout error." +
+                      "Judgment may have not been recorded to CAL.", xhr.responseText);
+              }
+          }
+      });
+
+      var next_doc = false;
+      while(next_doc === false){
+          var next_doc_tmp = queue.dequeue();
+          if(next_doc_tmp == undefined)
+              break;
+          if(!(next_doc_tmp["doc_id"] in judged_docs)){
+              next_doc = next_doc_tmp;
+          }
+      }
+
+      if(next_doc !== false){
+          // console.log("Size of queue: " + queue.getLength());
+          updateDocument(
+                  next_doc["doc_id"],
+                  next_doc["title"],
+                  next_doc["content"]
+          );
+
+      }else{
+          updateDocument(
+                  "",
+                  "<span class='text-danger'>Please wait..</span>",
+                  "The queue is empty."
+          );
+      }
+
+      // check if doc_id already in latestJudgedDocsQueue
+      var isInLatestJudgedDocsQueue = false;
+      var list = latestJudgedDocsQueue.getList();
+      for(var i = 0; i < latestJudgedDocsQueue.getLength();i++){
+          if(list[i]['doc_id'] == current_doc_id){
+              isInLatestJudgedDocsQueue = true;
+              break;
+          }
+      }
+
+
+      // var doc = {
+      //     "doc_id": current_doc_id,
+      //     "doc_content": current_doc_content,
+      //     'highlyRelevant': highlyRelevant,
+      //     'nonrelevant': nonrelevant,
+      //     'relevant': relevant
+      // };
+//
+      // if(isInLatestJudgedDocsQueue){
+      //     list.splice(i, 1);
+      //     latestJudgedDocsQueue.enqueue(doc);
+      // }else if(latestJudgedDocsQueue.getLength() == 10){
+      //     console.log("Latest judged docs queue reached its limit. Dequeuing then enquing");
+      //     latestJudgedDocsQueue.dequeueForce();
+      //     latestJudgedDocsQueue.enqueue(doc);
+      // }else{
+      //     latestJudgedDocsQueue.enqueue(doc);
+      // }
+//
+      // update_latest_judged_doc_view();
+  }
+
+
+
+function show_prev_judged_doc_and_hide_modal(doc_index){
+  var list = latestJudgedDocsQueue.getList();
+  var doc = list[doc_index];
+  var doFetch = false;
+
+  var doc_id = doc['doc_id'];
+  var doc_title = doc['doc_title'];
+  if (doc["highlyRelevant"]){
+      var doc_judgment_class = 'judged_doc_title_highly_relevant';
+  }else if(doc["nonrelevant"]){
+      var doc_judgment_class = 'judged_doc_title_nonrelevant';
+  }else if(doc["relevant"]){
+      var doc_judgment_class = 'judged_doc_title_relevant';
+  }
+  var doc_content = doc['doc_content'];
+  if (doc_content == ""){
+      doc_content = "<div class='container center-text'> <span class='text-danger'> <h4><i class='fas fa-sync fa-spin mr-4'></i></h4> <h5>Fetching document content. Please wait..</h5> </span> </div>"
+  }
+  var now = + new Date();
+  var data = {
+      'action': 'trig_show_prev_judged_doc',
+      'message': 'User clicked on a previously judged document from the undo modal',
+      'doc_id': doc_id,
+      'doc_title': doc_title,
+      'client_time': now,
+      'csrfmiddlewaretoken': '{{ csrf_token }}',
+      'page_title': document.title
+  };
+
+  $.ajax({
+      url: '{% url 'CAL:post_log_msg' %}',
+      type: 'POST',
+      data: JSON.stringify(data),
+      success: function (result) {
+          console.log(result['message']);
+      }
+  });
+
+  $('#reviewDocsModal').modal('hide');
+
+  updateDocument(
+      doc_id,
+      doc_title,
+      doc_content
+  );
+
+
+  // Reset queue
+  queue = new Queue();
+
+  if(doFetch){
+      $.ajax({
+          url: '{% url 'search:get_doc' %}?docid='+doc_id+'&query=',
+          type: 'GET',
+          success: function (result) {
+              updateDocument(
+                  doc_id,
+                  doc_title,
+                  result[0]['content']
+              );
+
+              // update instance so that we don't make another call.
+              doc['doc_date'] = result[0]['date'];
+              doc['doc_content'] = result[0]['content'];
+          },
+          error: function (result){
+              if(document_isEmpty()){
+                  updateDocument("",
+                  "<span class='text-danger'>Something went wrong..</sapn>",
+                  result['message']
+                  );
+              }
+
+              console.error("Something went wrong. " +
+                      "Judgment may have not been recorded.", result['responseText'])
+          },
+          statusCode: {
+              502: function (xhr) {
+                  if(document_isEmpty()){
+                      updateDocument("",
+                      "<span class='text-danger'>Something went wrong..</sapn>",
+                      xhr.responseText);
+                  }
+                  console.error("Something went wrong. Timeout error." +
+                      "Judgment may have not been recorded to CAL.", xhr.responseText);
+              }
+          }
+      });
+  }
+
+}
+
+function update_latest_judged_doc_view(){
+  console.log("Updating latest judged docs modal view");
+
+  // empty content of modal
+  $("#reviewCAL").html("");
+
+
+  var list = latestJudgedDocsQueue.getList();
+  for(var i = latestJudgedDocsQueue.getLength() - 1; i >= 0; i--){
+      var doc = list[i];
+
+      if(doc == undefined) break;
+
+      var doc_status_div = "";
+
+      if (doc["highlyRelevant"]){
+          doc_status_div = '<div class="bg-success" style="height: 100%; width:4px;"><i class="fa" aria-hidden="true"></i></div>';
+      }else if(doc["nonrelevant"]){
+          doc_status_div = '<div class="bg-danger" style="height: 100%; width:4px;"><i class="fa" aria-hidden="true"></i></div>';
+      }else if(doc["relevant"]){
+          doc_status_div = '<div class="bg-warning" style="height: 100%; width:4px;"><i class="fa" aria-hidden="true"></i></div>';
+      }
+
+      var doc_div = '' +
+      '<a href="#" onclick="show_prev_judged_doc_and_hide_modal(' + i + ')"> \n\
+          <div class="row top-margin"> \n\
+              <div class="col-md-1" style="min-width: 5px;"> \n\
+                  ' + doc_status_div + ' \n\
+              </div> \n\
+              <div class="col-md-11 text-truncate" style="font-family: georgia"> \n\
+                  ' + doc["doc_title"] + ' \n\
+              </div> \n\
+          </div> \n\
+      </a>';
+      $( "#reviewCAL" ).append( doc_div );
+  }
+}
+
+
+
+
+
+
+
+
+    function showAlarm(msg) {
+        var now = + new Date();
+        var data = {
+            'action': 'trig_user_gone_away',
+            'message': 'Alert message is shown to user.',
+            'extra_context': {
+                'alert_msg': msg
+            },
+            'client_time': now,
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'page_title': document.title
+        };
+        $.ajax({
+            url: '{% url 'progress:post_log_msg' %}',
+            type: 'POST',
+            data: JSON.stringify(data),
+            success: function (result) {
+                console.log(result['message']);
+            }
+        });
+
+        alert(msg);
+        document.body.click();
+        now = + new Date();
+        data = {
+            'action': 'trig_user_came_back',
+            'message': 'User clicked ok to alert message.',
+            'extra_context': {
+                'alert_msg': msg
+            },
+            'client_time': now,
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'page_title': document.title
+        };
+        $.ajax({
+            url: '{% url 'progress:post_log_msg' %}',
+            type: 'POST',
+            data: JSON.stringify(data),
+            success: function (result) {
+                console.log(result['message']);
+            }
+        });
+    }
+    window.jquery_ajax = $.ajax;
+    $.ajax = function (param) {
+        var tmp_success_callback = param['success'];
+        param['success'] = function (data, tmp, xhr) {
+            if (xhr.getResponseHeader('completed') == "1" && window.location.pathname != "/completed/") {
+                window.location.href = "/completed/";
+            } else
+                tmp_success_callback(data, tmp, xhr);
+        }
+        window.jquery_ajax(param);
+    };
+
+    $('#desc_popover').on('show.bs.popover', function () {
+        var now = +new Date();
+        var data = {
+            'action': 'trig_user_clicked_on_topic_desc',
+            'message': 'User clicked on the topic desc.',
+            'extra_context': {
+                "topic_title": "{{ user.current_task.topic.title|escapejs }}"
+            },
+            'client_time': now,
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'page_title': document.title
+        };
+        $.ajax({
+            url: '{% url 'progress:post_log_msg' %}',
+            type: 'POST',
+            data: JSON.stringify(data),
+            success: function (result) {
+                console.log(result['message']);
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $('[data-toggle="popover"]').popover({
+            trigger: 'focus'
+        });
+    });
+
+    // Notify server of page visit on page load
+    window.onload = function () {
+        var now = +new Date();
+        $.ajax({
+            url: '{% url 'progress:post_visit' %}',
+            type: 'POST',
+            data: JSON.stringify({
+                'client_time': now,
+                'page_title': document.title,
+                'page_file': '{{ request.page_file }}',
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            }),
+            success: function (result) {
+                console.log(result['message']);
+            }
+        });
+    };
+</script>
+
+{% block extra_scripts %}{% endblock %}
+
+
+</body>
+</html>

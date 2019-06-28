@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class CALHomePageView(views.LoginRequiredMixin, generic.TemplateView):
-    template_name = 'CAL/CAL.html'
+    template_name = 'base_html_collection.html'
 
     def get(self, request, *args, **kwargs):
         return super(CALHomePageView, self).get(self, request, *args, **kwargs)

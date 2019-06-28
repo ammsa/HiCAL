@@ -358,6 +358,10 @@ a.sidebar-brand{
 
 }
 
+.full-height {
+  height: 100%;
+}
+
 .light-gray-text a:focus,
 .light-gray-text a:hover,
 .gray-text a:focus,
@@ -550,6 +554,11 @@ input.date-radio-button[type="radio"]:checked {
 .nav-bar-padding{
   padding: 0rem 1rem 0rem 4rem;
 }
+
+.nav-bar-padding-v2 {
+  padding: 0rem 1rem 0rem 0rem;
+}
+
 
 .nav-link{
     transition-duration: 0.3s;

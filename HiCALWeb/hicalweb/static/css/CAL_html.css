@@ -1,0 +1,74 @@
+html {
+    height: 100%;
+    padding: 0;
+}
+
+body {
+    padding: 0;
+    min-height: 100%;
+    position: relative;
+    padding-bottom: 8rem;
+}
+
+.html-collection #Main {
+    height: 100%;
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    position: absolute;
+}
+
+.html-collection #LogoWrapper {
+    float: left;
+}
+
+.html-collection #Logo {
+
+    height: 6rem;
+    margin: 2rem;
+}
+
+.Judging {
+  float: right;
+  padding: 1rem;
+}
+
+#Help {
+  float: right;
+  padding: 1rem;
+}
+
+#Meta {
+    float: left;
+    padding: 2rem;
+    max-width: 21rem;
+}
+
+#Meta h1 {
+    font-size: 1.5rem;
+    font-weight: normal;
+    margin-top: .9em;
+}
+
+#Meta h1 em {
+    font-style: normal;
+    font-weight: bold;
+}
+
+#header {
+    height: 10rem;
+}
+
+#DocView {
+    height: calc(100% - 11.3rem);
+    position: relative;
+    top: -.1rem;
+}
+
+#DocView iframe {
+    width: 100%;
+    height: calc(100%  - 2px);
+    border: none;
+    border-top: 2px solid #0275d8;
+}
+

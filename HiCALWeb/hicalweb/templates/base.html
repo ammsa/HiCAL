@@ -25,9 +25,10 @@
 
 <body>
 
-
-<nav class="navbar nav-bar-padding navbar-toggleable-md bg-faded fixed-top font-montserrat">
-
+{% block top-nav-bar %}
+<nav class="{% block top-nav-bar-classes %}navbar nav-bar-padding navbar-toggleable-md bg-faded fixed-top font-montserrat{% endblock %}">
+  {% block top-nav-bar-inner %}
+  {% block top-nav-bar-head %}{% endblock %}
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -38,10 +39,12 @@
             <a id="desc_popover" href="#" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width: 800px;" data-toggle="popover" title="Topic Description" data-placement="bottom" data-trigger="focus" data-content="{% if user.current_task.topic.description %}{{ user.current_task.topic.description }}{% else %}No description provided.{% endif %}">
              {{ user.current_task.topic.title }}
             </a>
+            {% comment %}
             <span class="small mt-1 text-primary left-margin">
                 {% if user.current_task %}
                     [Click on topic to view full description]
                 {% endif %}
+            {% endcomment %}
             </span>
         </ul>
         {% endblock %}
@@ -63,8 +66,9 @@
             </ul>
         </div>
     </div>
-
+    {% endblock %}
 </nav>
+{% endblock %}
 
 <!-- Help Modal -->
 <div class="modal fade" id="helpModal" tabindex="-1" role="dialog"
@@ -92,9 +96,13 @@
     </div>
 </div>
 
-<div class="container-fluid">
-    <div class="row">
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        {% block right-nav-bar %}
         <nav class="col-sm-2 col-md-0-5 hidden-xs-down sidebar bg-faded font-open-sans">
+              {% block right-nav-bar-inner %}
+              {% block right-nav-bar-head %}{% endblock %}
+
             <ul class="nav nav-pills flex-column center-text">
                 <li class="nav-item sidebar-brand extra-bottom-margin">
                     <a class="nav-link sidebar-brand" href="/"><i class="fas fa-home" aria-hidden="true"></i></a>
@@ -126,28 +134,29 @@
                 {% endif %}
                 {% endblock %}
             </ul>
-
+          {% endblock %}
         </nav>
+        {% endblock %}
 
-        <main class="col-sm-10 offset-sm-1  offset-md-0-5 col-md-11 pt-3 top-margin extra-padding">
-            {% block messages %}
-                {% if messages %}
-                    <div class="alert alert-info"
-                         role="alert">
-                        <button type="button" class="close" data-dismiss="alert"
-                                aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        {% for message in messages %}
-                            <p class="no-margin">
-                                <strong>Done</strong> {{ message }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% endblock %}
-            {% block main %}
-                MAIN CONTENT HERE
-            {% endblock %}
+      <main class="{% block main-classes %}col-sm-10 offset-sm-1  offset-md-0-5 col-md-11 pt-3 top-margin extra-padding"{% endblock %}>
+          {% block messages %}
+              {% if messages %}
+                  <div class="alert alert-info"
+                       role="alert">
+                      <button type="button" class="close" data-dismiss="alert"
+                              aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                      </button>
+                      {% for message in messages %}
+                          <p class="no-margin">
+                              <strong>Done</strong> {{ message }}</p>
+                      {% endfor %}
+                  </div>
+              {% endif %}
+          {% endblock %}
+          {% block main %}
+              MAIN CONTENT HERE
+          {% endblock %}
         </main>
 
         {% block extra_body %}{% endblock %}
